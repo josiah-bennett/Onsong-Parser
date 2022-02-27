@@ -1,0 +1,11 @@
+# .gitignore
+.original-source/
+.testing-files/
+
+AidZ.onsong
+AidZ.html
+
+*.o
+*.hi
+
+onsong

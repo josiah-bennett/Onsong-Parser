@@ -6,6 +6,7 @@
 ChangeLog.md
 package.yaml
 
+*.chopro
 *.onsong
 *.html
 *~

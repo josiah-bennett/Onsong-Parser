@@ -3,12 +3,12 @@
 .testing-files/
 .stack-work/
 
-ChangeLog.md
 package.yaml
+stack.yaml.lock
+stack.yaml
 
 *.chopro
 *.onsong
 *.html
-*.lock
 *~
 

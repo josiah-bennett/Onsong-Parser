@@ -1,11 +1,12 @@
 # .gitignore
 .original-source/
 .testing-files/
+.stack-work/
 
-AidZ.onsong
-AidZ.html
+ChangeLog.md
+package.yaml
 
-*.o
-*.hi
+*.onsong
+*.html
+*~
 
-onsong

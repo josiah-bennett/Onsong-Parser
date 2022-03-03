@@ -9,5 +9,6 @@ package.yaml
 *.chopro
 *.onsong
 *.html
+*.lock
 *~
 

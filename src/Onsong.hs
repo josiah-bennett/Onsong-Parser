@@ -5,6 +5,7 @@ module Onsong
     ) where
 
 import Data.Text (Text, pack, unpack)
+import Data.Either
 import Text.Parsec
 
 import qualified Data.Text as T
@@ -43,11 +44,8 @@ findParagraph = filter (/=0) . map (uncurry(*)) . zip [1..] . map (fromEnum . T.
 -- Functions to parse the 'tail' of the file or the actual song
 -- this should work for both .onsong and .chopro files
 -- Metadata is going to be parsed extra
-parseParagraphHeader :: Parsec String () String
-parseParagraphHeader = do
-    header <- manyTill anyChar (try (char ':'))
-    return (convertHeader header)
-        where convertHeader h = "<h3>" ++ h ++ "</h3>\n<p>"
+parseParagraphHeader :: Parsec String () String 
+parseParagraphHeader = manyTill anyChar (try (char ':'))
 
 parseSongLine :: Text -> Text
 parseSongLine line = (T.replace (pack "[") openingTag . T.replace (pack "]") closingTag) (T.append line (pack "<br>"))
@@ -55,9 +53,12 @@ parseSongLine line = (T.replace (pack "[") openingTag . T.replace (pack "]") clo
           closingTag = pack "</span></span>"
 
 parseSongParagraph :: Paragraph -> Paragraph
-parseSongParagraph p = (header p):(map (parseSongLine) (tail p)) ++ [pack "</p>\n"]
-    where parsedHeader h = parse (parseParagraphHeader) "(source)" ((unpack . head) h)
-          header h = case (parsedHeader h) of
-                         Right text -> pack text
-                         Left _ -> pack "error!!!"
+parseSongParagraph (p:ps) | (isRight . parseHeader) p = (header p):(parseSection ps)
+                          | otherwise                 = parseSection (p:ps)
+    where parseSection s = (map (parseSongLine) s) ++ [pack "</p>\n"]
+          parseHeader  h = parse (parseParagraphHeader) "(source)" (unpack h)
+          header h = case (parseHeader h) of
+              Right text -> pack ("<h3>" ++ text ++ "</h3>\n<p>")
+              Left _ -> pack "<p>"
+
 

@@ -10,7 +10,7 @@ readParagraph :: FilePath -> IO [Paragraph]
 readParagraph filename = do 
     content <- IO.readFile filename
     return (contentToParagraph content)
-        where contentToParagraph = splitParagraph . T.lines . T.filter (/='\r')
+        where contentToParagraph = filter (/=[]) . splitParagraph . map (T.strip) . T.lines . T.filter (/='\r')
     
 
 -- write the parsed Paragraphs to a file

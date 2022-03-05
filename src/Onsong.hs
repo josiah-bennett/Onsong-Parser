@@ -17,7 +17,7 @@ splitParagraph songLines = splitAts (findParagraph songLines) songLines
 
 splitAts xs text = split text (reverse xs)
     where split t [] = [t]
-          split t (y:ys) = (split (take y t) ys) ++ [drop y t]
+          split t (y:ys) = (split (take (y-1) t) ys) ++ [drop y t]
 
 -- or the alternative:
 {-

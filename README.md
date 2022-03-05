@@ -160,7 +160,7 @@ e.g. for a file `song.onsong` use `song` as the filename
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] support for multiple empty lines between 'paragraphs'
+- [x] support for multiple empty lines between 'paragraphs'
 - [ ] metadata parsing
 - [ ] add proper ChordPro support
 - [ ] add proper interactability and error handling

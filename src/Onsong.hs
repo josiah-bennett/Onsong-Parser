@@ -2,7 +2,6 @@ module Onsong
     ( Paragraph
     , splitParagraph
     , wrapSong
-    , parseArtist
     , createHeader
     , createDataList
     , createCopyright

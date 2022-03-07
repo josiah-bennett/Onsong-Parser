@@ -1,7 +1,11 @@
 module Onsong
     ( Paragraph
     , splitParagraph
-    , parseSongParagraph
+    , wrapSong
+    , parseArtist
+    , createHeader
+    , createDataList
+    , createCopyright
     ) where
 
 import Data.Text (Text, pack, unpack)
@@ -61,4 +65,50 @@ parseSongParagraph (p:ps) | (isRight . parseHeader) p = (header p):(parseSection
               Right text -> pack ("<h3>" ++ text ++ "</h3>\n<p>")
               Left _ -> pack "<p>"
 
+wrapSong :: [Paragraph] -> Paragraph
+wrapSong song = concat [[pack "<div id=\"song\">"], concatMap parseSongParagraph song, [pack "</div>\n"]]
+
+-------------------------------------------------------------------------------
+-- Metadata parsing
+parseData :: String -> Paragraph -> [String]
+parseData tag = (filter (/="") . map (fromRight "" . parse p "(source)" . unpack))
+    where p = string tag >> char ':' >> many space >> many anyChar
+
+parseTitle :: Paragraph -> Text
+parseTitle metadata | null p = head metadata
+                    | otherwise = (pack . head) p
+    where p = parseData "Title" metadata
+
+line2 = (head . tail)
+
+parseArtist :: Paragraph -> Text
+parseArtist metadata | null p = case second of
+                          Right _ -> pack "Unknown Artist"
+                          Left _ -> (line2) metadata
+                     | otherwise = (pack . head) p
+    where p = parseData "Artist" metadata
+          second = parse (manyTill anyChar (try (char ':'))) "(source)" (line2 metadata)
+
+createHeader :: Paragraph -> [Text]
+createHeader metadata = [t, a, T.empty]
+    where t = T.concat [pack "<h1>", parseTitle metadata, pack "</h1>"]
+          a = T.concat [pack "<h2>", parseArtist metadata, pack "</h2>"]
+
+convertData :: String -> Paragraph -> Text
+convertData tag metadata | null p    = T.empty
+                         | otherwise = (pack . foldr (++) "") ["<li id=\"", lower tag, "\">", tag, ": ", head p, "</li>"]
+    where p = parseData tag metadata
+          lower = unpack . T.toLower . pack
+
+createDataList :: [String] -> Paragraph -> [Text]
+createDataList dataTags metadata = concat [[pack "<ul id=\"metadata\">"], tags dataTags, [pack "</ul>\n"]]
+    where tags = filter (/=T.empty) . map f
+          f tag = convertData tag metadata
+
+-- I can already see this implementation break, for some obscure song (but for now it works) !!!
+createCopyright :: Paragraph -> Text
+createCopyright metadata | null p    = T.empty
+                         | otherwise = T.concat [pack "<p id=\"copyright\">", removeParentheses, pack "</p>\n"]
+    where p = parseData "Copyright" metadata
+          removeParentheses = (T.strip . pack . fromRight (head p) . parse (manyTill anyChar (try (char '('))) "(source)") (head p)
 

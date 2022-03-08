@@ -78,7 +78,8 @@ parseTitle metadata | null p = head metadata
                     | otherwise = (pack . head) p
     where p = parseData "Title" metadata
 
-line2 = (head . tail)
+line2 l | (null . tail) l = pack ":" 
+        | otherwise = (head . tail) l
 
 parseArtist :: Paragraph -> Text
 parseArtist metadata | null p = case second of

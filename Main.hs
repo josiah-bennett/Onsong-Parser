@@ -29,9 +29,9 @@ appendParagraph filename parsedSong = do
     IO.appendFile filename content
 
 
-putSongTogether :: [String] -> [Paragraph] -> Paragraph
-putSongTogether tags c = concat [createHeader h, createDataList tags h, wrapSong s, [createCopyright h]]
-    where h = head c; s = tail c
+--putSongTogether :: [String] -> [Paragraph] -> Paragraph
+--putSongTogether tags c = concat [createHeader h, createDataList tags h, wrapSong s, [createCopyright h]]
+--    where h = head c; s = tail c
 
 {- --command line integration if wanted for bulk operations
 main :: IO ()
@@ -43,12 +43,13 @@ main = do
     where truncFilename = takeWhile (/='.')
 -}
 -- {- --default main function
+-- TODO this mess desperatly needs fixing !!!
 main :: IO ()
 main = do 
     putStrLn "Enter a Filename:"
-    filename <- getLine
-    content <- readParagraph (filename ++ ".onsong")
-    let song = putSongTogether ["Key", "Tempo", "Time", "Duration"] content
-    writeParagraph (filename ++ ".html") song
+    --filename <- getLine
+    --content <- readParagraph (filename ++ ".onsong")
+    --let song = putSongTogether ["Key", "Tempo", "Time", "Duration"] content
+    --writeParagraph (filename ++ ".html") song
 -- -}
 

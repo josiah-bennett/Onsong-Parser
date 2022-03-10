@@ -52,8 +52,8 @@ parseParagraphHeader = manyTill anyChar (try (char ':'))
 
 parseSongLine :: Text -> Text
 parseSongLine line = (T.replace (pack "[") openingTag . T.replace (pack "]") closingTag) (T.append line (pack "<br>"))
-    where openingTag = pack "<span class=\"chord\"><span class=\"text\">"
-          closingTag = pack "</span></span>"
+    where openingTag = pack "<span class=\"chord\">"
+          closingTag = pack "</span>"
 
 parseSongParagraph :: Paragraph -> Paragraph
 parseSongParagraph (p:ps) | (isRight . parseHeader) p = (header p):(parseSection ps)

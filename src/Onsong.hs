@@ -3,7 +3,8 @@
 module Onsong
     ( Paragraph
     , splitParagraph
-    , wrapSong
+    , parseSection
+    , parseHeader
     , parseTag
     , parseTitle
     , parseArtist
@@ -56,22 +57,40 @@ findParagraph = filter (/=0) . map (uncurry(*)) . zip [1..] . map (fromEnum . T.
 parseSectionHeader :: Parsec String () String 
 parseSectionHeader = manyTill anyChar (try (char ':'))
 
-parseSectionLine :: Text -> Text -- TODO change output type to ([Text], [Text]) the first list is the text the second the chords...
-parseSectionLine line = (T.replace (pack "[") openingTag . T.replace (pack "]") closingTag) (T.append line (pack "<br>"))
-    where openingTag = pack "<span class=\"chord\">"
-          closingTag = pack "</span>"
+parseSectionLine :: Text -> ([Text], [Text])
+parseSectionLine = unzip . parseLine . parseLine1 . unpack
 
-parseSongParagraph :: Paragraph -> Paragraph
-parseSongParagraph (p:ps) | (isRight . parseHeader) p = (header p):(parseSection ps)
-                          | otherwise                 = parseSection (p:ps)
-    where parseSection s = (map (parseSongLine) s) ++ [pack "</p>\n"]
-          parseHeader  h = parse (parseParagraphHeader) "(source)" (unpack h)
-          header h = case (parseHeader h) of
-              Right text -> pack ("<h3>" ++ text ++ "</h3>\n<p>")
-              Left _ -> pack "<p>"
+-- this whole block is pretty unreadable, unmaintainable mess...
+-- it works but would greatly benefit from clean up sometime...
+parseLine :: [String] -> [(Text, Text)]
+parseLine [] = []
+parseLine [a] = [(pack a, "")]
+parseLine (a1:a2:as) = (pack a1, pack a2):(parseLine as)
 
-wrapSong :: [Paragraph] -> Paragraph
-wrapSong song = concat [[pack "<div id=\"song\">"], concatMap parseSongParagraph song, [pack "</div>\n"]]
+-- double recursion here !!! watch out !!!
+parseLine1 :: String -> [String]
+parseLine1 line = case (parse p1 "(source)" line) of
+        Right t -> t:(parseLine2 (drop (length t + 1) line))
+        Left  _ | null line -> []
+                | otherwise -> [line]
+    where p1 = manyTill anyChar (try (char '['))
+
+parseLine2 :: String -> [String]
+parseLine2 line = case (parse p2 "(source)" line) of
+        Right t -> t:(parseLine1 (drop (length t + 1) line))
+        Left  _ -> []
+    where p2 = manyTill anyChar (try (char ']'))
+
+-- fix this code ... (or just remove it ...)
+parseHeader :: Paragraph -> Text
+parseHeader (p:_) = case (parse (parseSectionHeader) "(source)" (unpack p)) of
+            Right t -> pack t
+            Left  _ -> ""
+
+parseSection :: Paragraph -> [([Text], [Text])]
+parseSection (p:ps) = case (parse (parseSectionHeader) "(source)" (unpack p)) of
+            Right _ -> map (parseSectionLine) ps
+            Left  _ -> map (parseSectionLine) (p:ps)
 
 -------------------------------------------------------------------------------
 -- Metadata parsing

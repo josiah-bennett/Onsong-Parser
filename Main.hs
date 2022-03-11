@@ -1,6 +1,9 @@
 module Main where
 
 import Onsong
+import Html
+
+import Lucid
 
 import System.Environment
 

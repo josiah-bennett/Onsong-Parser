@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
 import Onsong
@@ -32,9 +34,22 @@ appendParagraph filename parsedSong = do
     IO.appendFile filename content
 
 
---putSongTogether :: [String] -> [Paragraph] -> Paragraph
---putSongTogether tags c = concat [createHeader h, createDataList tags h, wrapSong s, [createCopyright h]]
---    where h = head c; s = tail c
+createHtml :: [Paragraph] -> Html ()
+createHtml content = html_ 
+                      (do header 
+                            (parseTitle mdata)
+                          body_
+                            (do main_
+                                  (do heading (parseTitle mdata) (parseArtist mdata)
+                                      metadata (createMetadataList mdataList mdata)
+                                      div_ [id_ "song"] 
+                                        (do mapM_ (\s -> section (parseHeader s) (parseSection s)) song)
+                                      copyright (parseCopyright mdata))
+                                footer (".")))
+        where mdata = head content
+              mdataList = ["Key", "Time", "Tempo", "Duration"]
+              song = tail content
+
 
 {- --command line integration if wanted for bulk operations
 main :: IO ()
@@ -50,9 +65,9 @@ main = do
 main :: IO ()
 main = do 
     putStrLn "Enter a Filename:"
-    --filename <- getLine
-    --content <- readParagraph (filename ++ ".onsong")
-    --let song = putSongTogether ["Key", "Tempo", "Time", "Duration"] content
-    --writeParagraph (filename ++ ".html") song
+    filename <- getLine
+    content <- readParagraph (filename ++ ".onsong")
+    let song = createHtml content
+    renderToFile (filename ++ ".html") song
 -- -}
 

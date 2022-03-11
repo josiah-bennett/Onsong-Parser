@@ -61,7 +61,7 @@ parseSectionLine :: Text -> ([Text], [Text])
 parseSectionLine = unzip . parseLine . parseLine1 . unpack
 
 -- this whole block is pretty unreadable, unmaintainable mess...
--- it works but would greatly benefit from clean up sometime...
+-- it works but would greatly benefit from clean up sometime... TODO !!!
 parseLine :: [String] -> [(Text, Text)]
 parseLine [] = []
 parseLine [a] = [(pack a, "")]
@@ -81,7 +81,7 @@ parseLine2 line = case (parse p2 "(source)" line) of
         Left  _ -> []
     where p2 = manyTill anyChar (try (char ']'))
 
--- fix this code ... (or just remove it ...)
+
 parseHeader :: Paragraph -> Text
 parseHeader (p:_) = case (parse (parseSectionHeader) "(source)" (unpack p)) of
             Right t -> pack t

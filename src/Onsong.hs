@@ -28,27 +28,9 @@ splitAts xs text = split text (reverse xs)
     where split t [] = [t]
           split t (y:ys) = (split (take (y-1) t) ys) ++ [drop y t]
 
--- or the alternative:
-{-
-splitAts xs text = split text (diffList xs)
-    where split t [] = [t]
-          split t (y:ys) = (take y t):(split (drop y t) ys)
-
--- diffList subtracts the first item in the list from the rest for all elements
-diffList = f . (0:)
-    where f [_] = []
-          f (a:b:xs) = (b-a):(f . (b:)) xs
--}
-
 findParagraph = filter (/=0) . zipWith (*) [1..] . map (fromEnum . T.null)
 
--- or again the alternatives:
-{-
-findParagraph = filter (/=0) . map (\(i,x) -> i * (fromEnum . T.null) x) . zip [1..]
-
-findParagraph = filter (/=0) . map (uncurry(*)) . zip [1..] . map (fromEnum . T.null)
--}
-
+-------------------------------------------------------------------------------
 -- Functions to parse the 'tail' of the file or the actual song
 -- this should work for both .onsong and .chopro files
 -- Section parsing
@@ -58,7 +40,7 @@ parseSectionHeader :: Parsec String () String
 parseSectionHeader = manyTill anyChar (try (char ':'))
 
 parseSectionLine :: Text -> ([Text], [Text])
-parseSectionLine = unzip . parseLine . parseLine1 . unpack
+parseSectionLine = unzip . parseLine . parseText . unpack
 
 -- this whole block is pretty unreadable, unmaintainable mess...
 -- it works but would greatly benefit from clean up sometime... TODO !!!
@@ -68,24 +50,23 @@ parseLine [a] = [(pack a, "")]
 parseLine (a1:a2:as) = (pack a1, pack a2):(parseLine as)
 
 -- double recursion here !!! watch out !!!
-parseLine1 :: String -> [String]
-parseLine1 line = case (parse p1 "(source)" line) of
-        Right t -> t:(parseLine2 (drop (length t + 1) line))
+p :: Char -> Parsec String () String
+p c = manyTill anyChar (try (char c))
+
+parseText :: String -> [String]
+parseText line = case (parse (p '[') "(source)" line) of
+        Right t -> t:(parseChord (drop (length t + 1) line))
         Left  _ | null line -> []
                 | otherwise -> [line]
-    where p1 = manyTill anyChar (try (char '['))
 
-parseLine2 :: String -> [String]
-parseLine2 line = case (parse p2 "(source)" line) of
-        Right t -> t:(parseLine1 (drop (length t + 1) line))
+parseChord :: String -> [String]
+parseChord line = case (parse (p ']') "(source)" line) of
+        Right t -> t:(parseText (drop (length t + 1) line))
         Left  _ -> []
-    where p2 = manyTill anyChar (try (char ']'))
 
 
 parseHeader :: Paragraph -> Text
-parseHeader (p:_) = case (parse (parseSectionHeader) "(source)" (unpack p)) of
-            Right t -> pack t
-            Left  _ -> ""
+parseHeader (p:_) = (pack . fromRight "" . parse (parseSectionHeader) "(source)" . unpack) p
 
 parseSection :: Paragraph -> [([Text], [Text])]
 parseSection (p:ps) = case (parse (parseSectionHeader) "(source)" (unpack p)) of
@@ -94,41 +75,44 @@ parseSection (p:ps) = case (parse (parseSectionHeader) "(source)" (unpack p)) of
 
 -------------------------------------------------------------------------------
 -- Metadata parsing
+tag' :: String -> Parsec String () String
+tag' s = string s >> char ':' >> many space >> many anyChar
 
-parseTag :: String -> Paragraph -> [String]
-parseTag tag = filter (/="") . map (fromRight "" . parse t "(source)" . unpack)
-    where t = string tag >> char ':' >> many space >> many anyChar
+
+parseTag :: String -> Paragraph -> String
+parseTag _ [] = ""
+parseTag tag (x:xs) = (fromRight (parseTag tag xs) . parse (tag' tag) "(source)" . unpack) x
 
 
 parseTitle :: Paragraph -> Text
 parseTitle metadata | null t    = head metadata
-                    | otherwise = (pack . head) t
+                    | otherwise = pack t
             where t = parseTag "Title" metadata
 
 
 parseArtist :: Paragraph -> Text
-parseArtist metadata | null t    = case second of
+parseArtist metadata | null tag  = case implicit of
                             Right _ -> "Unknown Artist"
-                            Left  _ -> line2 metadata
-                     | otherwise = (pack . head) t
-            where t   = parseTag "Artist" metadata
-                  second = parse (manyTill anyChar (try (char ':'))) "(source)" (line2 metadata)
-                  line2 line | (null . tail) line = ":"
-                             | otherwise          = (head . tail) line
+                            Left  _ -> line2
+                     | otherwise = pack tag
+            where tag      = parseTag "Artist" metadata
+                  implicit = parse (manyTill anyChar (try (char ':'))) "(source)" line2
+                  line2 | (null . tail) metadata = ":"
+                        | otherwise = (head . tail) metadata
 
 
 parseMetadata :: String -> Paragraph -> (String, String)
 parseMetadata tag metadata | null t    = (tag, "")
-                           | otherwise = (tag, head t)
+                           | otherwise = (tag, t)
                 where t = parseTag tag metadata
 
 createMetadataList :: [String] -> Paragraph -> [(String, String)]
-createMetadataList tags metadata = map (\t -> parseMetadata t metadata) tags
+createMetadataList tags metadata = map (flip parseMetadata metadata) tags
 
 
 -- I can already see this implementation break, for some obscure song (but for now it works) !!!
 parseCopyright :: Paragraph -> Text
 parseCopyright metadata | null t    = T.empty
-                        | otherwise = (T.strip . pack . fromRight (head t) . parse (manyTill anyChar (try (char '('))) "(source)") (head t)
+                        | otherwise = (T.strip . pack . fromRight t . parse (manyTill anyChar (try (char '('))) "(source)") t
                 where t = parseTag "Copyright" metadata
 

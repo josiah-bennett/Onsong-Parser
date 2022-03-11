@@ -214,8 +214,8 @@ Project Link: [https://github.com/josiah-bennett/Onsong-Parser](https://github.c
 ## Acknowledgments
 
 * [README Template](https://github.com/othneildrew/Best-README-Template)
-<!--* []()-->
-<!--* []()-->
+* [Parsec](https://github.com/haskell/parsec)
+* [Lucid](https://github.com/chrisdone/lucid)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

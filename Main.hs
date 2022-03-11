@@ -28,7 +28,7 @@ createHtml content = html_
                             (do main_
                                   (do heading (parseTitle mdata) (parseArtist mdata)
                                       metadata (createMetadataList mdataList mdata)
-                                      div_ [id_ "song"] 
+                                      div_ [id_ "song" class_ "show-chords"] 
                                         (do mapM_ (\s -> section (parseHeader s) (parseSection s)) song)
                                       copyright (parseCopyright mdata))
                                 footer (".")))

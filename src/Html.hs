@@ -22,7 +22,7 @@ import Lucid
 header filename = head_ (do
             meta_ [charset_ "UTF-8"]
             meta_ [name_ "viewport", content_ "width=device-width initial-scale=1"]
-            link_ [rel_ "stylesheet", href_ "./style.css"]
+            link_ [rel_ "stylesheet", href_ "./css/style.css"]
             title_ (toHtml filename)
             meta_ [name_ "description", content_ "chord sheet generated with Onsong-Parser"])
 

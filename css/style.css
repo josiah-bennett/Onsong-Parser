@@ -1,0 +1,65 @@
+* {
+    font-family: "Helvetica"
+}
+
+h1 {
+    font-size: 3em;
+    font-variant: small-caps;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.5em;
+    line-height: 1.5em;
+    margin-top: 0;
+    text-align: center
+}
+
+#metadata {
+    list-style-type: none;
+    padding-left: 0;
+    width: 20%;
+    position: absolute;
+    left: 2%;
+    text-align: start;
+}
+
+#metadata li {
+    padding: 7px 0;
+}
+
+
+#song {
+    font-size: 1em;
+    width: 75%;
+    position: relative;
+    left: 25%;
+}
+
+#song h3 {
+    padding-left: 0.5em;
+}
+
+#song p {
+    line-height: 120%;
+}
+
+#song.show-chords p {
+    line-height: 220%;
+}
+
+#song p .chord {
+    display: none;
+}
+
+#song.show-chords p .chord {
+    position: relative;
+    top: -1em;
+    display:inline-block;
+    width: 0;
+    overflow: visible;
+    color: #F00;
+    font-weight: bold;
+}
+

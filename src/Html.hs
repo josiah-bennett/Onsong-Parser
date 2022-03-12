@@ -3,8 +3,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module Html
-    ( render
-    , header
+    ( header
     , heading
     , metadata
     , section
@@ -13,18 +12,19 @@ module Html
     , footer
     ) where
 
-import Control.Monad (forM_)
+import Internal.Html
 
+import Control.Monad (forM_)
 import Lucid
 
 
 --header :: ToHtml a => a -> Html ()
-header filename = head_ (do
-            meta_ [charset_ "UTF-8"]
-            meta_ [name_ "viewport", content_ "width=device-width initial-scale=1"]
-            link_ [rel_ "stylesheet", href_ "./css/style.css"]
-            title_ (toHtml filename)
-            meta_ [name_ "description", content_ "chord sheet generated with Onsong-Parser"])
+header filename = head_ 
+                    (do meta_ [charset_ "UTF-8"]
+                        meta_ [name_ "viewport", content_ "width=device-width initial-scale=1"]
+                        link_ [rel_ "stylesheet", href_ "./css/style.css"]
+                        title_ (toHtml filename)
+                        meta_ [name_ "description", content_ "chord sheet generated with Onsong-Parser"])
 
 
 --heading :: ToHtml a => a -> a -> Html ()
@@ -37,20 +37,6 @@ metadata :: [(String, String)] -> Html ()
 metadata tagMap = ul_ [id_ "metadata"] (forM_ tagMap (li_ . toHtml . concatPair))
     where concatPair (key, value) = key ++ ": " ++ value
 
-
-chord :: ToHtml a => a -> Html ()
-chord c = span_ [class_ "chord"] (toHtml c)
-
-
-interleave :: [a] -> [a] -> [a]
-interleave (a:as) (b:bs) = a:b:interleave as bs
-interleave as     []     = as
-interleave []     bs     = bs
-
---line :: ToHtml a => [a] -> [a] -> Html ()
-line textPieces chords = mconcat (interleave htmlText htmlChords ++ [br_ []])
-    where htmlText   = map toHtml textPieces
-          htmlChords = map chord chords
 
 --section :: ToHtml a => a -> [([a],[a])] -> Html ()
 section header content = h3_ (toHtml header) <> p_ (forM_ content (uncurry line))
@@ -65,7 +51,6 @@ copyright text = p_ [id_ "copyright"] (toHtml text)
 
 
 --footer :: T.Text -> Html ()
+footer "" = footer "."
 footer home = footer_ (hr_ [] <> a_ [href_ home] "Home")
 
-
-render a b = renderText (heading a b)

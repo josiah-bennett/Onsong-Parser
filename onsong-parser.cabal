@@ -25,6 +25,7 @@ source-repository head
 library
   exposed-modules:
       Html
+      Internal.Html
       Onsong
   other-modules:
       Paths_onsong_parser
@@ -57,11 +58,13 @@ test-suite onsong-parser-test
   main-is: Spec.hs
   other-modules:
       Paths_onsong_parser
+      HtmlSpec
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , hspec
     , lucid
     , onsong-parser
     , parsec

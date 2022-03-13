@@ -1,6 +1,6 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExtendedDefaultRules #-}
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE OverloadedStrings    #-}
 
 module Html
     ( header
@@ -12,14 +12,14 @@ module Html
     , footer
     ) where
 
-import Internal.Html
+import           Internal.Html
 
-import Control.Monad (forM_)
-import Lucid
+import           Control.Monad (forM_)
+import           Lucid
 
 
 --header :: ToHtml a => a -> Html ()
-header filename = head_ 
+header filename = head_
                     (do meta_ [charset_ "UTF-8"]
                         meta_ [name_ "viewport", content_ "width=device-width initial-scale=1"]
                         link_ [rel_ "stylesheet", href_ "./css/style.css"]
@@ -51,6 +51,6 @@ copyright text = p_ [id_ "copyright"] (toHtml text)
 
 
 --footer :: T.Text -> Html ()
-footer "" = footer "."
+footer ""   = footer "."
 footer home = footer_ (hr_ [] <> a_ [href_ home] "Home")
 

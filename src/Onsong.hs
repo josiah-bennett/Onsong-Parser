@@ -9,14 +9,16 @@ module Onsong
     , parseTitle
     , parseArtist
     , parseCopyright
+    , parseMetadata
     , createMetadataList
     ) where
 
-import Data.Text (Text, pack, unpack)
-import Data.Either
-import Text.Parsec
+import           Data.Either
+import           Data.Text       (Text, pack, unpack)
+import qualified Data.Text       as T
+import           Text.Parsec
 
-import qualified Data.Text as T
+import           Internal.Onsong
 
 -- create an alias for [Text]
 type Paragraph = [Text]
@@ -24,54 +26,18 @@ type Paragraph = [Text]
 splitParagraph :: [Text] -> [Paragraph]
 splitParagraph songLines = splitAts (findParagraph songLines) songLines
 
-splitAts xs text = split text (reverse xs)
-    where split t [] = [t]
-          split t (y:ys) = (split (take (y-1) t) ys) ++ [drop y t]
-
-findParagraph = filter (/=0) . zipWith (*) [1..] . map (fromEnum . T.null)
-
 -------------------------------------------------------------------------------
 -- Functions to parse the 'tail' of the file or the actual song
 -- this should work for both .onsong and .chopro files
 -- Section parsing
 
--- this functions has its flaws ... (if there is still content after the ':' it gets cut off) [problem for future me...]
-parseSectionHeader :: Parsec String () String 
-parseSectionHeader = manyTill anyChar (try (char ':'))
-
-parseSectionLine :: Text -> ([Text], [Text])
-parseSectionLine = unzip . parseLine . parseText . unpack
-
--- this whole block is pretty unreadable, unmaintainable mess...
--- it works but would greatly benefit from clean up sometime... TODO !!!
-parseLine :: [String] -> [(Text, Text)]
-parseLine [] = []
-parseLine [a] = [(pack a, "")]
-parseLine (a1:a2:as) = (pack a1, pack a2):(parseLine as)
-
--- double recursion here !!! watch out !!!
-p :: Char -> Parsec String () String
-p c = manyTill anyChar (try (char c))
-
-parseText :: String -> [String]
-parseText line = case (parse (p '[') "(source)" line) of
-        Right t -> t:(parseChord (drop (length t + 1) line))
-        Left  _ | null line -> []
-                | otherwise -> [line]
-
-parseChord :: String -> [String]
-parseChord line = case (parse (p ']') "(source)" line) of
-        Right t -> t:(parseText (drop (length t + 1) line))
-        Left  _ -> []
-
-
 parseHeader :: Paragraph -> Text
-parseHeader (p:_) = (pack . fromRight "" . parse (parseSectionHeader) "(source)" . unpack) p
+parseHeader (x:_) = (pack . fromRight "" . parse pHeader "(source)" . unpack) x
 
 parseSection :: Paragraph -> [([Text], [Text])]
-parseSection (p:ps) = case (parse (parseSectionHeader) "(source)" (unpack p)) of
-            Right _ -> map (parseSectionLine) ps
-            Left  _ -> map (parseSectionLine) (p:ps)
+parseSection (x:xs) = case parse pHeader "(source)" (unpack x) of
+            Right _ -> map parseLine xs
+            Left  _ -> map parseLine (x:xs)
 
 -------------------------------------------------------------------------------
 -- Metadata parsing
@@ -107,7 +73,7 @@ parseMetadata tag metadata | null t    = (tag, "")
                 where t = parseTag tag metadata
 
 createMetadataList :: [String] -> Paragraph -> [(String, String)]
-createMetadataList tags metadata = map (flip parseMetadata metadata) tags
+createMetadataList tags metadata = map (`parseMetadata` metadata) tags
 
 
 -- I can already see this implementation break, for some obscure song (but for now it works) !!!

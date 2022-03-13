@@ -1,6 +1,6 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExtendedDefaultRules #-}
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE OverloadedStrings    #-}
 
 module Internal.Html
     ( interleave
@@ -8,7 +8,7 @@ module Internal.Html
     , line
     ) where
 
-import Lucid
+import           Lucid
 
 
 interleave :: [a] -> [a] -> [a]

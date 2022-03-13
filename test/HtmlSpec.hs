@@ -1,27 +1,27 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExtendedDefaultRules #-}
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE OverloadedStrings    #-}
 
 module HtmlSpec (spec) where
 
-import Test.Hspec
-import Html
-import Internal.Html
+import           Html
+import           Internal.Html
+import           Test.Hspec
 
-import Lucid (renderText)
+import           Lucid         (renderText)
 
 spec :: Spec
-spec = do 
-  headerSpec
-  headingSpec
-  metadataSpec
-  interleaveSpec
-  chordSpec
-  lineSpec
-  sectionSpec
-  --keywordSpec
-  copyrightSpec
-  footerSpec
+spec = do
+    headerSpec
+    headingSpec
+    metadataSpec
+    interleaveSpec
+    chordSpec
+    lineSpec
+    sectionSpec
+    --keywordSpec
+    copyrightSpec
+    footerSpec
 
 
 headerSpec :: Spec

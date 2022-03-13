@@ -27,6 +27,7 @@ library
       Html
       Internal.Html
       Onsong
+      Internal.Onsong
   other-modules:
       Paths_onsong_parser
   hs-source-dirs:
@@ -59,6 +60,7 @@ test-suite onsong-parser-test
   other-modules:
       Paths_onsong_parser
       HtmlSpec
+      OnsongSpec
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N

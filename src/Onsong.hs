@@ -32,12 +32,16 @@ splitParagraph songLines = splitAts (findParagraph songLines) songLines
 -- Section parsing
 
 parseHeader :: Paragraph -> Text
-parseHeader (x:_) = (pack . fromRight "" . parse pHeader "(source)" . unpack) x
+parseHeader (x:_) = case parse pTranspose "(source)" (unpack x) of
+      Right _ -> ""
+      Left  _ -> (pack . fromRight "" . parse pHeader "(source)" . unpack) x
 
 parseSection :: Paragraph -> [([Text], [Text])]
-parseSection (x:xs) = case parse pHeader "(source)" (unpack x) of
-            Right _ -> map parseLine xs
-            Left  _ -> map parseLine (x:xs)
+parseSection (x:xs) = case parse pTranspose "(source)" (unpack x) of
+            Right t -> map parseLine (pack t:xs)
+            Left  _ -> case parse pHeader "(source)" (unpack x) of
+                        Right _ -> map parseLine xs
+                        Left  _ -> map parseLine (x:xs)
 
 -------------------------------------------------------------------------------
 -- Metadata parsing

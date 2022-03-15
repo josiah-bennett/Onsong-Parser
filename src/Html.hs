@@ -43,7 +43,7 @@ section header content = h3_ (toHtml header) <> p_ (forM_ content (uncurry line)
 
 
 copyright :: ToHtml a => a -> Html ()
-copyright text = p_ [id_ "copyright"] (toHtml text)
+copyright text = i_ [id_ "copyright"] (toHtml text)
 
 
 --keywords text = do

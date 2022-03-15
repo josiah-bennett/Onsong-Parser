@@ -6,6 +6,7 @@ module Internal.Html
     ( checkChordSpacing
     , interleave
     , chord_
+    , createChord
     , line
     ) where
 
@@ -14,14 +15,19 @@ import           Lucid
 import           Data.Text (Text, unpack, pack, length)
 
 
+-- this still needs some work !!!
+-- wrapper function for cCS because that function starts calulating padding
+-- starting for the second Chord
 checkChordSpacing :: [Text] -> [Text] -> [Int]
-checkChordSpacing []  [c] = []
-checkChordSpacing [t] [c] = []
-checkChordSpacing [t] [] = []
-checkChordSpacing [t1,t2] [c] = []
-checkChordSpacing (_:t:ts) (c1:c2:cs) 
-    | length c1 >= length t = (14 * (length c1 - length t)):checkChordSpacing (t:ts) (c2:cs) 
-    | otherwise = 0:checkChordSpacing (t:ts) (c2:cs)
+checkChordSpacing _    []     = []
+checkChordSpacing text chords = 0:cCS text chords
+
+cCS :: [Text] -> [Text] -> [Int]
+cCS (_:t:ts) (c1:c2:cs) 
+    | length c1 > length t  = (15 * (length c1 - length t)):cCS (t:ts) (c2:cs) 
+    | length c1 == length t = 5:cCS (t:ts) (c2:cs)
+    | otherwise = 0:cCS (t:ts) (c2:cs)
+cCS _ _ = []
 
 
 interleave :: [a] -> [a] -> [a]
@@ -34,15 +40,17 @@ chord_ :: Term a r => a -> r
 chord_ = termWith "span" [class_ "chord"]
 
 
-addPadding :: Int -> Text -> Html ()
-addPadding padding chord | padding == 0 = chord_ (toHtml chord) 
-                         | otherwise    = chord_ [style_ pad] (toHtml chord)
-        where pad = pack ("padding-left: " ++ show padding ++ ";")
+createChord :: Int -> Text -> Html ()
+createChord _       ""    = ""
+createChord padding chord | padding == 0 = chord_ (toHtml chord) 
+                          | otherwise    = chord_ [style_ pad] (toHtml chord)
+        where pad = pack ("padding-left: " ++ show padding ++ "px;")
 
 
 line :: [Text] -> [Text] -> Html ()
-line [] [] = ""
+line []         []     = ""
+line [text]     ["!"]  = i_ (toHtml text)
 line textPieces chords = mconcat (interleave htmlText htmlChords ++ [br_ []])
-    where padding    = 0:checkChordSpacing textPieces chords
+    where padding    = checkChordSpacing textPieces chords
           htmlText   = map toHtml textPieces
-          htmlChords = map (uncurry addPadding) (zip padding chords)
+          htmlChords = map (uncurry createChord) (zip padding chords)

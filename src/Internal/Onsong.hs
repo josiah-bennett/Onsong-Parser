@@ -4,6 +4,8 @@ module Internal.Onsong
     ( splitAts
     , findParagraph
     , pHeader
+    , pParentheses
+    , pTranspose
     , pBracets
     , parseText
     , parseChord
@@ -31,8 +33,21 @@ findParagraph = filter (/=0) . zipWith (*) [1..] . map (fromEnum . T.null)
 pHeader :: Parsec String () String
 pHeader = manyTill anyChar (try (char ':'))
 
+pParentheses :: Parsec String () String
+pParentheses = char '(' >> manyTill anyChar (try (char ')'))
+
+pTranspose :: Parsec String () String
+pTranspose = do 
+    key <- string "Transpose" 
+    value <- char ':' >> many anyChar
+    return ("(" ++ key ++ ":" ++ value ++ ")")
+
+
+
 parseLine :: Text -> ([Text], [Text])
-parseLine = unzip . splitLine . parseText . unpack
+parseLine t = case parse pParentheses "(source)" (unpack t) of
+        Right s -> ([pack ("(" ++ s ++ ")")], ["!"])
+        Left  _ -> (unzip . splitLine . parseText . unpack) t
 
 -- this whole block is pretty unreadable, unmaintainable mess...
 -- it works but would greatly benefit from clean up sometime... TODO !!!

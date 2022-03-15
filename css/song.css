@@ -1,0 +1,27 @@
+/* the most basic css script for making the html site work:
+ *     monospace font and styling for the inlined chords
+ */
+
+#song p {
+    /* monospace font is absolutely needed (for solving the overlapping chord problem) */
+    font-family: "Space Mono", monospace; 
+    line-height: 120%;
+}
+
+#song.show-chords p {
+    line-height: 220%;
+}
+
+#song p .chord {
+    display: none;
+}
+
+/* show chords above the lyrics (turn off by removing the show-chords class) */
+#song.show-chords p .chord {
+    position: relative;
+    top: -1em;
+    display:inline-block;
+    width: 0;
+    overflow: visible;
+}
+

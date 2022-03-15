@@ -21,7 +21,7 @@
 <!--[![Forks][forks-shield]][forks-url]-->
 <!--[![Stargazers][stars-shield]][stars-url]-->
 [![Issues][issues-shield]][issues-url]
-[![GPL v3.0 License][license-shield]][license-url]
+[![BSD 3 License][license-shield]][license-url]
 
 
 
@@ -121,7 +121,8 @@ Then follow these simple steps to get a development version running:
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/josiah-bennett/Onsong-Parser.git
+   mkdir onsong-parser && cd onsong-parser
+   git clone https://github.com/josiah-bennett/Onsong-Parser.git .
    ```
 2. Initialize project
    ```sh
@@ -161,7 +162,7 @@ e.g. for a file `song.onsong` use `song` as the filename
 ## Roadmap
 
 - [x] support for multiple empty lines between 'paragraphs'
-- [ ] metadata parsing
+- [x] metadata parsing
 - [ ] add proper ChordPro support
 - [ ] add proper interactability and error handling
 - [ ] implement a proper testing suite
@@ -193,7 +194,7 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-Distributed under the GPL v3.0 License. See `LICENSE.md` for more information.
+Distributed under the BSD 3 License. See `LICENSE.md` for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

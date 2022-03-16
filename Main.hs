@@ -1,6 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Main where
+module Main 
+    ( main
+    , readParagraph
+    , createHtml
+    ) where
 
 import Onsong
 import Html
@@ -21,7 +25,7 @@ readParagraph filename = do
 
 
 createHtml :: [Paragraph] -> Html ()
-createHtml content = html_ 
+createHtml content = doctype_ <> html_ 
                       (do header 
                             (parseTitle mdata)
                           body_
@@ -29,24 +33,25 @@ createHtml content = html_
                                   (do heading (parseTitle mdata) (parseArtist mdata)
                                       metadata (createMetadataList mdataList mdata)
                                       div_ [id_ "song", class_ "show-chords"] 
-                                        (do mapM_ (\s -> section (parseHeader s) (parseSection s)) song)
-                                      copyright (parseCopyright mdata))
-                                footer (".")))
+                                        (do mapM_ (\s -> section (parseHeader s) (parseSection s)) song))
+                                copyright (parseCopyright mdata)
+                                footer ("../index.html")))
         where mdata = head content
               mdataList = ["Key", "Time", "Tempo", "Duration"]
               song = tail content
 
 
-{- --command line integration if wanted for bulk operations
+-- command line integration if wanted for bulk operations
+-- takes two arguments the .onsong file and the filename to write to
 main :: IO ()
 main = do
-    filename <- getArgs
-    content <- readParagraph (head filename)
+    filenames <- getArgs
+    content <- readParagraph (head filenames)
     let song = createHtml content
-    renderToFile (((truncFilename . head) filename) ++ ".html") song
-    where truncFilename = takeWhile (/='.')
--}
+    renderToFile ((head . tail) filenames) song
+
 --default main function
+{-
 main :: IO ()
 main = do 
     putStrLn "Enter a Filename:"
@@ -54,4 +59,5 @@ main = do
     content <- readParagraph (filename ++ ".onsong")
     let song = createHtml content
     renderToFile (filename ++ ".html") song
+-}
 

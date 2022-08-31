@@ -81,7 +81,7 @@
 <!--[![Product Name Screen Shot][product-screenshot]](https://example.com)-->
 
 A parser for .onsong (and potentially .chopro) files to create html files, made in Haskell.
-Written for my static site generator (repo doesn't exist yet) to create an interface for a large onsong-library I wanted to host on a raspberry pi.
+Written for my static site generator [josiah-bennett/Onsong-SSG](https://github.com/josiah-bennett/Onsong-SSG) to create an interface for a large onsong-library I wanted to host on a raspberry pi.
 It was made because I wanted to share my songs with people for a gathering without everyone owning the Onsong App and not being able to project the lyrics onto a screen for everyone.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
